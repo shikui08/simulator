@@ -43,7 +43,7 @@ private:
 private:
 	static void screenshot();
 	static void DrawGrid();
-    // OPENGL³¡¾°µÄ¸÷ÖÖº¯Êý
+    // OPENGLï¿½ï¿½ï¿½ï¿½ï¿½Ä¸ï¿½ï¿½Öºï¿½ï¿½ï¿½
 	static void RenderGPU_CUDA();
 	static void onRender();
 	static void OnReshape(int nw, int nh);
@@ -53,10 +53,10 @@ private:
 	static void OnKey(unsigned char key, int, int);
 	static void OnShutdown();
 	inline void check_GL_error();
-	static void Scene::draw_select_vertex();
+	static void draw_select_vertex();
 
 private:
-	static int oldX, oldY;    // OPENGL³¡¾°µÄ¸÷ÖÖ²ÎÊýdeclaration
+	static int oldX, oldY;    // OPENGLï¿½ï¿½ï¿½ï¿½ï¿½Ä¸ï¿½ï¿½Ö²ï¿½ï¿½ï¿½declaration
 	static float rX, rY;
 	static int state;
 	static float dist, dy;

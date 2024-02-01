@@ -1,5 +1,4 @@
 #pragma once
-#include <windows.h>
 
 class stop_watch
 {
@@ -7,43 +6,43 @@ public:
 	stop_watch()
 		: elapsed_(0)
 	{
-		QueryPerformanceFrequency(&freq_);
+		// QueryPerformanceFrequency(&freq_);
 	}
 	~stop_watch() {}
 public:
 	void start()
 	{
-		QueryPerformanceCounter(&begin_time_);
+		// QueryPerformanceCounter(&begin_time_);
 	}
 	void stop()
 	{
-		LARGE_INTEGER end_time;
-		QueryPerformanceCounter(&end_time);
-		elapsed_ += (end_time.QuadPart - begin_time_.QuadPart) * 1000000 / freq_.QuadPart;
+		// LARGE_INTEGER end_time;
+		// QueryPerformanceCounter(&end_time);
+		// elapsed_ += (end_time.QuadPart - begin_time_.QuadPart) * 1000000 / freq_.QuadPart;
 	}
 	void restart()
 	{
 		elapsed_ = 0;
 		start();
 	}
-	//Î¢Ãë
+	//Î¢ï¿½ï¿½
 	double elapsed()
 	{
 		return static_cast<double>(elapsed_);
 	}
-	//ºÁÃë
+	//ï¿½ï¿½ï¿½ï¿½
 	double elapsed_ms()
 	{
 		return elapsed_ / 1000.0;
 	}
-	//Ãë
+	//ï¿½ï¿½
 	double elapsed_second()
 	{
 		return elapsed_ / 1000000.0;
 	}
 
 private:
-	LARGE_INTEGER freq_;
-	LARGE_INTEGER begin_time_;
+	// LARGE_INTEGER freq_;
+	// LARGE_INTEGER begin_time_;
 	long long elapsed_;
 };

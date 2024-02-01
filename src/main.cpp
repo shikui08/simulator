@@ -1,4 +1,4 @@
-// simulation_bvh.cpp : ¶¨Òå¿ØÖÆÌ¨Ó¦ÓÃ³ÌÐòµÄÈë¿Úµã¡£
+// simulation_bvh.cpp : ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì¨Ó¦ï¿½Ã³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Úµã¡£
 //
 #include <iostream>
 //#include <cmdline.h>
@@ -21,13 +21,13 @@ int main(int argc, char** argv)
 
 	Scene* main_scene = Scene::getInstance(argc, argv); //initialize opengl 
 
-	Mesh cloth("../../../resources/cloth/tshirt2/tshirt2.obj", SINGLE_LAYER_NOB);
+	Mesh cloth("./resources/cloth/tshirt2/tshirt2.obj", SINGLE_LAYER_NOB);
 	cloth.rotation(90, X);   
 	cloth.rotation(-4, Z);
 	cloth.scale(3.33);
-	cloth.translate(0, 1.98, 0.02);  // maybe we can use model matrix to handle this
+	cloth.translate(0, 1.98, -0.05);  // maybe we can use model matrix to handle this
 
-	Mesh body("../../../resources/pose/Female.obj");
+	Mesh body("./resources/pose/female.obj");
 	body.scale(3.226);
 	body.translate(0, 1.8, 0);
 

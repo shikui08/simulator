@@ -1,5 +1,5 @@
 #pragma once
-#include "BBox.h"
+#include "bbox.h"
 #include <glm/glm.hpp>
 #define uint unsigned int
 

@@ -1,6 +1,6 @@
 #pragma once
 #include <vector>
-
+#include <algorithm>
 void getFPS();
 
 
@@ -18,7 +18,7 @@ private:
 	const std::vector<Key> &_keys;
 };
 
-// ÈÝÆ÷±ØÐëÊÇvectorµÈÖ§³ÖËæ»ú·ÃÎÊµÄÈÝÆ÷
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½vectorï¿½ï¿½Ö§ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½ï¿½ï¿½ï¿½
 template<class Containers>
 void indices_sort(const Containers &keys, std::vector<unsigned int> &indices)
 {
@@ -31,7 +31,7 @@ void indices_sort(const Containers &keys, std::vector<unsigned int> &indices)
 
 }
 
-// ÎªÖ§³Ö¸üÍ¨ÓÃµÄÇé¿ö£¬ÓÉÓÃ»§È·±£indicesµÄË÷Òý²»³¬¹ýkeysµÄ´óÐ¡
+// ÎªÖ§ï¿½Ö¸ï¿½Í¨ï¿½Ãµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã»ï¿½È·ï¿½ï¿½indicesï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½keysï¿½Ä´ï¿½Ð¡
 template<class Containers>
 void remove_redundant(const Containers &keys, std::vector<unsigned int> &indices)
 {
@@ -54,7 +54,7 @@ void remove_redundant(const Containers &keys, std::vector<unsigned int> &indices
 	indices.resize(n);
 }
 
-// ÎªÖ§³Ö¸üÍ¨ÓÃµÄÇé¿ö£¬ÓÉÓÃ»§È·±£indicesµÄË÷Òý²»³¬¹ýkeysµÄ´óÐ¡
+// ÎªÖ§ï¿½Ö¸ï¿½Í¨ï¿½Ãµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã»ï¿½È·ï¿½ï¿½indicesï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½keysï¿½Ä´ï¿½Ð¡
 template<class Containers>
 void filter(const Containers &input, const std::vector<unsigned int> &indices, Containers &ouput)
 {

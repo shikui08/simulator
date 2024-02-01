@@ -11,7 +11,7 @@ using namespace std;
 float startTime = 0;
 int totalFrames = 0;
 float currentTime = 0;
-char info[MAX_PATH] = { 0 };
+char info[256] = { 0 };
 
 void getFPS()
 {
@@ -27,7 +27,7 @@ void getFPS()
 		startTime = newTime;
 		totalFrames = 0;
 
-		sprintf_s(info, "GLUT Cloth Demo FPS: %4.3f", fps);
+		sprintf(info, "GLUT Cloth Demo FPS: %4.3f", fps);
 		//cout << fps << endl;
 	}
 	glutSetWindowTitle(info);

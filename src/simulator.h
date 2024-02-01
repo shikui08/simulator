@@ -2,8 +2,8 @@
 #include "Mesh.h"
 #include "./bvh/bvh.h"
 #include "spring.h"
-#include <cuda_runtime.h>
-#include <cuda_gl_interop.h>
+#include "/usr/local/cuda-12.1/include/cuda_runtime_api.h"
+#include "/usr/local/cuda-12.1/include/cuda_gl_interop.h"
 
 
 class Simulator
@@ -11,7 +11,7 @@ class Simulator
 public:
 	Simulator();
 	~Simulator();
-	Simulator(Mesh& cloth,Mesh& body);
+	Simulator(Mesh& cloth, std::vector<Mesh>& body);
 	void simulate(Mesh* cloth);
 	void cuda_update_vbo(Mesh* sim_cloth);
 	void update_vertex(glm::vec3 new_value, const unsigned int idx);
@@ -20,8 +20,8 @@ public:
 private:
 	void init_cloth(Mesh& cloth);
 	void init_spring(Mesh& cloth);
-	void build_bvh(Mesh& body);
-	void cuda_verlet(const unsigned int numParticles);
+	void build_bvh(std::vector<Mesh>& body);
+	void cuda_verlet(int frameidx, const unsigned int numParticles);
 
 	void get_vertex_adjface(Mesh& sim_cloth, vector<unsigned int>& CSR_R, vector<unsigned int>& CSR_C_adjface);
 	void computeGridSize(unsigned int n, unsigned int blockSize, unsigned int &numBlocks, unsigned int &numThreads);
@@ -55,6 +55,6 @@ private:
 public:
 
 	//for bvh tree
-	BVHAccel* cuda_bvh;
+	std::vector<BVHAccel*> cuda_bvh;
 };
 

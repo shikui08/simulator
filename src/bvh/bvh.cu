@@ -30,7 +30,7 @@ __device__ unsigned int d_expandBits(unsigned int v)
 // given 3D point located within the unit cube [0,1].
 __device__ unsigned int d_morton3D(glm::vec3 p)
 {
-	float x = p.x, float y = p.y, float z = p.z;
+	float x = p.x,  y = p.y,  z = p.z;
 	x = min(max(x * 1024.0f, 0.0f), 1023.0f);
 	y = min(max(y * 1024.0f, 0.0f), 1023.0f);
 	z = min(max(z * 1024.0f, 0.0f), 1023.0f);
@@ -145,7 +145,7 @@ void save(vector<Primitive>& primitives, string file_name)
 	//outfile << "# morton code" << endl;
 	//for (auto pri: primitives)
 	//{
-	//	outfile << pri.morton_code << endl;   //Êý¾ÝÐ´ÈëÎÄ¼þ
+	//	outfile << pri.morton_code << endl;   //ï¿½ï¿½ï¿½ï¿½Ð´ï¿½ï¿½ï¿½Ä¼ï¿½
 	//}
 	//outfile.close();
 	//cout << "save done!" << endl;

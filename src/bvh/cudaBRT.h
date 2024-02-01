@@ -1,5 +1,6 @@
 #pragma once
-#include<cuda_runtime.h>
+#include "/usr/local/cuda-12.1/include/cuda.h"
+#include </usr/local/cuda-12.1/include/cuda_runtime_api.h>
 #include "bbox.h"
 #include "../common.h"
 #include "./primitive.h"

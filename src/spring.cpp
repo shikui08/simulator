@@ -4,7 +4,7 @@
 #include <set>
 #include <algorithm>
 #include <iostream>
-#include <cuda_runtime.h>
+#include "/usr/local/cuda-12.1/include/cuda_runtime_api.h"
 
 using namespace std;
 
@@ -39,7 +39,7 @@ void Matrix::Insert_Matrix(
 	if(mat.end()!=ite1)
 	{
 		value_inline.push_back(make_pair(ite1->second,k));
-		int v1,v2,v3,v4; //v3, v4 Îª¹«ÓÃµã
+		int v1,v2,v3,v4; //v3, v4 Îªï¿½ï¿½ï¿½Ãµï¿½
 		v1 = ite1->second;
 		v2 = k;
 		v3 = ite1->first.first;
@@ -57,7 +57,7 @@ void Matrix::Insert_Matrix(
 	if(mat.end()!=ite2)
 	{
 		value_inline.push_back(make_pair(ite2->second,k));
-		int v1, v2, v3, v4; //v3, v4 Îª¹«ÓÃµã
+		int v1, v2, v3, v4; //v3, v4 Îªï¿½ï¿½ï¿½Ãµï¿½
 		v1 = ite2->second;
 		v2 = k;
 		v3 = ite2->first.first;
@@ -83,7 +83,7 @@ Springs::Springs(Mesh* spring_obj)
 {
 	if (spring_obj->get_obj_type() == SINGLE_LAYER_BOUNDARY)
 	{
-		get_cloth_boundary_spring(spring_obj); //ºóÃæÐèÒªÒÀÀµ
+		get_cloth_boundary_spring(spring_obj); //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½
 		get_boundary_boundary_spring(spring_obj);
 	}
 
@@ -97,8 +97,8 @@ Springs::~Springs()
 
 void Springs::get_cloth_boundary_spring(Mesh* spring_obj)
 {  
-	//µÚÒ»´Î½¨Á¢ºÃÖ®ºóÓ¦¸Ã±£´æÏà¹ØÐÅÏ¢ÖÁÎÄ±¾£¬¶àÖ¡simulationÊ±Ê¹ÓÃµÚÒ»´ÎµÄÁ¬½Ó
-	//¶ÁÈëË³ÐòÎªcloth1,cloth1_boundary,cloth2,cloth2_boundary...
+	//ï¿½ï¿½Ò»ï¿½Î½ï¿½ï¿½ï¿½ï¿½ï¿½Ö®ï¿½ï¿½Ó¦ï¿½Ã±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½Ä±ï¿½ï¿½ï¿½ï¿½ï¿½Ö¡simulationÊ±Ê¹ï¿½Ãµï¿½Ò»ï¿½Îµï¿½ï¿½ï¿½ï¿½ï¿½
+	//ï¿½ï¿½ï¿½ï¿½Ë³ï¿½ï¿½Îªcloth1,cloth1_boundary,cloth2,cloth2_boundary...
 	
 	int g_start = 0;
 	unsigned int *idx = new unsigned int[spring_obj->vertices.size()]; 
@@ -107,7 +107,7 @@ void Springs::get_cloth_boundary_spring(Mesh* spring_obj)
 		unsigned int group_size = spring_obj->vertex_object[n].second;
 		kdtree *kd = kd_create(3);
 		
-		for (int i=0;i<group_size;i++)   //ÎªÃæÆ¬1½¨Á¢kdtree
+		for (int i=0;i<group_size;i++)   //Îªï¿½ï¿½Æ¬1ï¿½ï¿½ï¿½ï¿½kdtree
 		{
 			idx[i+g_start] = i+g_start;
 			int ret = kd_insert3f(kd, spring_obj->vertices[i+g_start].x,
@@ -117,7 +117,7 @@ void Springs::get_cloth_boundary_spring(Mesh* spring_obj)
 		}
 		g_start += spring_obj->vertex_object[n].second;
 
-		for (int i=0; i <spring_obj->vertex_object[n+1].second; i++)    //Îª±ß½çÖÐµÄµãÕÒ×îÁÚ½üµã
+		for (int i=0; i <spring_obj->vertex_object[n+1].second; i++)    //Îªï¿½ß½ï¿½ï¿½ÐµÄµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú½ï¿½ï¿½ï¿½
 		{
 			float kdpos[3];
 			kdres *result = kd_nearest3f(kd, spring_obj->vertices[i+g_start].x,
@@ -136,7 +136,7 @@ void Springs::get_cloth_boundary_spring(Mesh* spring_obj)
 
 void Springs::get_boundary_boundary_spring(Mesh* spring_obj)
 {
-	//Ëæ»úÑ¡È¡N¸ö×÷Îª±ß½çÓëÃæÆ¬×îÁÚµãÖ®¼äµÄ×î´ó¾àÀë
+	//ï¿½ï¿½ï¿½Ñ¡È¡Nï¿½ï¿½ï¿½ï¿½Îªï¿½ß½ï¿½ï¿½ï¿½ï¿½ï¿½Æ¬ï¿½ï¿½ï¿½Úµï¿½Ö®ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	float max_dist = 0;
 	const unsigned int NUM = 100;
 	for (int i = 0; i<NUM; i++)
@@ -146,9 +146,9 @@ void Springs::get_boundary_boundary_spring(Mesh* spring_obj)
 		max_dist += glm::distance(spring_obj->vertices[idx1],spring_obj->vertices[idx2]);
 	}
 	max_dist /= NUM;
-	cout << "±ß½çÓëÃæÆ¬×îÁÚµãÖ®¼äµÄ×î´ó¾àÀë£º" << max_dist << endl;
+	cout << "ï¿½ß½ï¿½ï¿½ï¿½ï¿½ï¿½Æ¬ï¿½ï¿½ï¿½Úµï¿½Ö®ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ë£º" << max_dist << endl;
 
-	////Îª±ß½çÖ®¼ä½¨Á¢µ¯»É:¹Ì¶¨Ò»×é£¬ÔÚÊ£ÏÂboundary×éÖÐËÑË÷
+	////Îªï¿½ß½ï¿½Ö®ï¿½ä½¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½:ï¿½Ì¶ï¿½Ò»ï¿½é£¬ï¿½ï¿½Ê£ï¿½ï¿½boundaryï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	vector<pair<unsigned int,unsigned int>> start_end;
 	int start = 0;
 	for(int n=0;n<spring_obj->vertex_object.size();n += 2)
@@ -161,8 +161,8 @@ void Springs::get_boundary_boundary_spring(Mesh* spring_obj)
 	int *idx = new int[spring_obj->vertices.size()];
 	for(int i=0;i<start_end.size();i++)
 	{
-		//µ±Ç°ËÑË÷ÎªµÚiÆ¬boundary
-		//Îª³ýiÍâµÄÆäËûËùÓÐboundary½¨Á¢kdtree
+		//ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½iÆ¬boundary
+		//Îªï¿½ï¿½iï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½boundaryï¿½ï¿½ï¿½ï¿½kdtree
 		kdtree *kd = kd_create(3);
 		for(int j=0;j<start_end.size();j++)
 		{
@@ -177,7 +177,7 @@ void Springs::get_boundary_boundary_spring(Mesh* spring_obj)
 			}
 		}
 
-		//¿ªÊ¼ËÑË÷£¬½¨Á¢µ¯»É
+		//ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		for(int k=start_end[i].first;k<start_end[i].second;k++)
 		{
 			float kdpos[3];
@@ -187,7 +187,7 @@ void Springs::get_boundary_boundary_spring(Mesh* spring_obj)
 			int *resultidx = (int*)kd_res_itemf(result, kdpos);
 
 			if (glm::distance(spring_obj->vertices[k],spring_obj->vertices[*resultidx]) < max_dist*50
-				&& glm::distance(spring_obj->vertices[k],spring_obj->vertices[*resultidx]) > 0) //¼ÓÈë¾àÀëÅÐ¶Ï£¬·ÀÖ¹´íÁ¬
+				&& glm::distance(spring_obj->vertices[k],spring_obj->vertices[*resultidx]) > 0) //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¶Ï£ï¿½ï¿½ï¿½Ö¹ï¿½ï¿½ï¿½ï¿½
 			{
 				boundary_boundary_springs.push_back(make_pair(k,*resultidx));
 			}
@@ -225,7 +225,7 @@ void Springs::get_boundary_boundary_spring(Mesh* spring_obj)
 	//}
 	//unsigned int *idx = new unsigned int[spring_obj->uni_vertices.size()]; 
 	//kdtree *kd = k create(3);
-	//for (int i=start_end[8].first;i<start_end[8].second;i++)   //ÎªÃæÆ¬1½¨Á¢kdtree
+	//for (int i=start_end[8].first;i<start_end[8].second;i++)   //Îªï¿½ï¿½Æ¬1ï¿½ï¿½ï¿½ï¿½kdtree
 	//	{
 	//		idx[i] = i;
 	//		int ret = k insert3f(kd, spring_obj->uni_vertices[i].x,
@@ -242,7 +242,7 @@ void Springs::get_boundary_boundary_spring(Mesh* spring_obj)
 	//			spring_obj->uni_vertices[i].z);
 	//		int *resultidx = (int*)k res_itemf(result, kdpos);
 
-	//		if (glm::distance(spring_obj->uni_vertices[i],spring_obj->uni_vertices[*resultidx]) < max_dist*20) //¼ÓÈë¾àÀëÅÐ¶Ï£¬·ÀÖ¹´íÁ¬
+	//		if (glm::distance(spring_obj->uni_vertices[i],spring_obj->uni_vertices[*resultidx]) < max_dist*20) //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¶Ï£ï¿½ï¿½ï¿½Ö¹ï¿½ï¿½ï¿½ï¿½
 	//		{
 	//			boundary_boundary_springs.push_back(make_pair(i,*resultidx));
 	//		}
@@ -295,7 +295,7 @@ void Springs::create_neigh(Mesh* spring_obj)
 		{
 			f[j] = spring_obj->faces[i].vertex_index[j];
 		}
-		if (!exist(neigh1[f[0]], f[1]))   //È¥µôneighbourÖÐÖØ¸´µÄÁÚ½Óµã
+		if (!exist(neigh1[f[0]], f[1]))   //È¥ï¿½ï¿½neighbourï¿½ï¿½ï¿½Ø¸ï¿½ï¿½ï¿½ï¿½Ú½Óµï¿½
 			neigh1[f[0]].push_back(f[1]);
 		if (!exist(neigh1[f[0]], f[2]))
 			neigh1[f[0]].push_back(f[2]);
@@ -326,7 +326,7 @@ void Springs::create_neigh(Mesh* spring_obj)
 	//create neigh2 for each vertex
 	neigh2.resize(spring_obj->vertices.size());
 	Matrix NR(spring_obj);   //Neighbour Relation
-	vector<pair<unsigned int, unsigned int>> point_inline;  //´æ´¢Á½¸ö¹²±ßÈý½ÇÐÎ¶Ô½Ç¶¥µãË÷Òý
+	vector<pair<unsigned int, unsigned int>> point_inline;  //ï¿½æ´¢ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î¶Ô½Ç¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 	for (int i = 0; i<spring_obj->faces.size(); i++)
 	{
@@ -388,5 +388,5 @@ void Springs::CSR_spring(const Mesh* spring_obj, const vector<vector<unsigned in
 		}
 	}
 
-	CSR_R.push_back(start_idx);   // ±ãÓÚºóÃæ¼ÆËãµÄÍ³Ò»´¦Àí
+	CSR_R.push_back(start_idx);   // ï¿½ï¿½ï¿½Úºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í³Ò»ï¿½ï¿½ï¿½ï¿½
 }

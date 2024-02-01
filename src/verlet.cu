@@ -11,10 +11,10 @@
 
 //physics parameter
 __constant__ double spring_structure = 100.0;
-__constant__ double spring_bend = 2.0;
+__constant__ double spring_bend = 5.0;
 __constant__ float damp = -0.02f; 
 __constant__ float mass = 0.3;
-__constant__ float dt = 1 / 40.0f;
+__constant__ float dt = 1 / 100.0f;
 
 __constant__ float gravit_x = 0.0f;   // in y dir
 __constant__ float gravit_y = -0.00981f;   // in y dir
@@ -33,7 +33,7 @@ __device__ void collision_response_projection(D_BVH bvh,
 		glm::vec3 normal;
 		if (bvh.primitive_intersect(idx_pri, pos, dist, normal))  // check the point inside the primitive or not
 		{
-			float k = 1.0;
+			float k = 2.0;
 			dist = k*glm::abs(dist);    // //collision response with penalty force
 			pos += dist*normal;
 			pos_old = pos;

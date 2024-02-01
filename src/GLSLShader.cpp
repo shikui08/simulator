@@ -102,7 +102,6 @@ unsigned  int GLSLShader::GetProgram() const {
 	return _program;
 }
 #include <fstream>
-#include <direct.h>
 void GLSLShader::LoadFromFile(GLenum whichShader, const string& filename){
 	ifstream fp(filename);
 	if(fp) {		 

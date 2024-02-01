@@ -3,7 +3,6 @@
 #include <fstream>
 #include <sstream>
 
-#include <Windows.h>
 #include <FreeImage.h>
 #include <GL/glew.h>
 #include <GL/freeglut.h>
@@ -73,7 +72,7 @@ ObjLoader::ObjLoader(const string file):obj_file(file)
 			int ePos = sPos;
 			string temp;
 			ePos = f1.find_first_of("/");
-			if(ePos == string::npos)  //处理不同格式的face, f  1 2 3
+			if(ePos == string::npos)  //锟斤拷锟斤拷锟斤拷同锟斤拷式锟斤拷face, f  1 2 3
 			{
 				tem.vertex_index[0] = atoi(f1.c_str()) - 1;
 				tem.vertex_index[1] = atoi(f2.c_str()) - 1;
@@ -88,7 +87,7 @@ ObjLoader::ObjLoader(const string file):obj_file(file)
 				tem.normal_index[2] = atoi(f3.c_str()) - 1;
 
 			}
-			else     //处理不同格式的face, f  1/1/1 2/2/2 3/3/3
+			else     //锟斤拷锟斤拷锟斤拷同锟斤拷式锟斤拷face, f  1/1/1 2/2/2 3/3/3
 			{
 				if(ePos != string::npos)  {
 					temp = f1.substr(sPos, ePos - sPos);

@@ -40,11 +40,11 @@ Simulator::~Simulator()
 	cudaFree(CSR_R_bend);
 	cudaFree(CSR_C_structure);
 	cudaFree(CSR_C_bend);
-
-	delete cuda_bvh;
+	for(auto& c : cuda_bvh)
+		delete c;
 }
 
-Simulator::Simulator(Mesh& sim_cloth, Mesh& body) :readID(0), writeID(1)
+Simulator::Simulator(Mesh& sim_cloth, std::vector<Mesh>& body) :readID(0), writeID(1)
 {
 	init_cloth(sim_cloth);
 	init_spring(sim_cloth);
@@ -84,7 +84,7 @@ void Simulator::init_cloth(Mesh& sim_cloth)
 	safe_cuda(cudaMemcpy(x_cur[0], &tem_vertices[0], vertices_bytes, cudaMemcpyHostToDevice));
 	safe_cuda(cudaMemcpy(x_last[0], &tem_vertices[0], vertices_bytes, cudaMemcpyHostToDevice));
 
-	//¼ÆËãnormalËùÐèµÄÊý¾Ý£ºÃ¿¸öµãÁÚ½ÓµÄÃæµÄË÷Òý + Ã¿¸öÃæµÄ3¸öµãµÄË÷Òý
+	//ï¿½ï¿½ï¿½ï¿½normalï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý£ï¿½Ã¿ï¿½ï¿½ï¿½ï¿½ï¿½Ú½Óµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ + Ã¿ï¿½ï¿½ï¿½ï¿½ï¿½3ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	vector<unsigned int> TEM_CSR_R;
 	vector<unsigned int> TEM_CSR_C_adjface;
 	get_vertex_adjface(sim_cloth, TEM_CSR_R, TEM_CSR_C_adjface);
@@ -124,25 +124,28 @@ void Simulator::init_spring(Mesh& sim_cloth)
 	cout << "springs build successfully!" << endl;
 }
 
-void Simulator::build_bvh(Mesh& body)
+void Simulator::build_bvh(std::vector<Mesh>& bodyvec)
 {
 	stop_watch watch;
 	watch.start();
-	Mesh bvh_body = body;   // for bvh consttruction
-	bvh_body.vertex_extend(0.003);
+	for(auto & body : bodyvec) {
+		Mesh bvh_body = body;   // for bvh consttruction
+		bvh_body.vertex_extend(0.003);
 
-	watch.start();
-	cuda_bvh = new BVHAccel(bvh_body);
-	watch.stop();
-	cout << "bvh build done free time elapsed: " << watch.elapsed() << "us" << endl;
+		watch.start();
+		cuda_bvh.emplace_back(new BVHAccel(bvh_body));
+		watch.stop();
+		cout << "bvh build done free time elapsed: " << watch.elapsed() << "us" << endl;
+	}
 }
 
 
 void Simulator::simulate(Mesh* sim_cloth)
 {
 	//cuda kernel compute .........
-	
-	cuda_verlet(sim_cloth->vertices.size());
+	static int i = 0;
+	static int substeps = 10;
+	cuda_verlet((i++ % (cuda_bvh.size() * substeps)) / substeps, sim_cloth->vertices.size());
 
 	cuda_update_vbo(sim_cloth);     // update array buffer for opengl
 
@@ -179,14 +182,14 @@ void Simulator::get_vertex_adjface(Mesh& sim_cloth, vector<unsigned int>& CSR_R,
 	CSR_R.push_back(start_idx);
 }
 
-void Simulator::cuda_verlet(const unsigned int numParticles)
+void Simulator::cuda_verlet(int frameidx, const unsigned int numParticles)
 {
 	unsigned int numThreads, numBlocks;
 	
 	computeGridSize(numParticles, 512, numBlocks, numThreads);
 	verlet <<< numBlocks, numThreads >>>(x_cur_in,x_last_in, x_cur_out, x_last_out,
 										CSR_R_structure, CSR_C_structure, CSR_R_bend, CSR_C_bend,
-										*cuda_bvh->d_bvh, d_collision_force,
+										*(cuda_bvh[frameidx]->d_bvh), d_collision_force,
 										numParticles);
 
 	// stop the CPU until the kernel has been executed
@@ -207,7 +210,7 @@ void Simulator::cuda_update_vbo(Mesh* sim_cloth)
 	safe_cuda(cudaGraphicsResourceGetMappedPointer((void **)&d_vbo_vertex, &num_bytes, d_vbo_array_resource));
 	safe_cuda(cudaGraphicsResourceGetMappedPointer((void **)&d_adjvertex_to_face, &num_bytes, d_vbo_index_resource));
 
-	d_vbo_normal = (glm::vec3*)((float*)d_vbo_vertex + 4 * sim_cloth->vertices.size() + 2 * sim_cloth->tex.size());   // »ñÈ¡normalÎ»ÖÃÖ¸Õë	
+	d_vbo_normal = (glm::vec3*)((float*)d_vbo_vertex + 4 * sim_cloth->vertices.size() + 2 * sim_cloth->tex.size());   // ï¿½ï¿½È¡normalÎ»ï¿½ï¿½Ö¸ï¿½ï¿½	
 
 	unsigned int numThreads, numBlocks;
 

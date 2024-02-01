@@ -13,9 +13,9 @@ set_target_properties(simulator PROPERTIES
     CUDA_SEPARABLE_COMPILATION ON
     CUDA_RESOLVE_DEVICE_SYMBOLS ON
     POSITION_INDEPENDENT_CODE ON
-    CUDA_ARCHITECTURES 35 50 75
-    MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>") 
+    CUDA_ARCHITECTURES 89) 
 target_link_libraries(simulator 3rd_libs)
+target_link_libraries(simulator GLU)
 
 # install
 install (TARGETS simulator DESTINATION bin)

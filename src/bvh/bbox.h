@@ -1,5 +1,6 @@
 #pragma once
-#include <cuda_runtime.h>
+#include "/usr/local/cuda-12.1/include/cuda.h"
+#include "/usr/local/cuda-12.1/include/cuda_runtime_api.h"
 #include <glm/glm.hpp>
 #include <iostream>
 
@@ -74,12 +75,12 @@ struct BBox
 
 	/**
 	* Intersects point with bounding box, does not store shading information.
-	Checking if a point is inside an AABB is pretty simple ¡ª we just need to check whether the point's coordinates fall inside the AABB; 
+	Checking if a point is inside an AABB is pretty simple ï¿½ï¿½ we just need to check whether the point's coordinates fall inside the AABB; 
 	considering each axis separately. If we assume that Px, Py and Pz are the point's coordinates, 
-	and BminX¨CBmaxX, BminY¨CBmaxY, and BminZ¨CBmaxZ are the ranges of each exis of the AABB, 
+	and BminXï¿½CBmaxX, BminYï¿½CBmaxY, and BminZï¿½CBmaxZ are the ranges of each exis of the AABB, 
 	we can calculate whether a collision has occured between the two using the following formula:
 
-	f(P,B)=(Px>=BminX¡ÄPx<=BmaxX)¡Ä(Py>=BminY¡ÄPy<=BmaxY)¡Ä(Pz>=BminZ¡ÄPz<=BmaxZ)
+	f(P,B)=(Px>=BminXï¿½ï¿½Px<=BmaxX)ï¿½ï¿½(Py>=BminYï¿½ï¿½Py<=BmaxY)ï¿½ï¿½(Pz>=BminZï¿½ï¿½Pz<=BmaxZ)
 	*/
 	__host__ __device__
 	bool intersect(const glm::vec3& point) const

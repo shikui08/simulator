@@ -1,6 +1,6 @@
 
 #include "scene.h"
-#include "wglew.h"
+// #include "wglew.h"
 #include <iostream>
 #include <FreeImage.h>
 #include <fstream> 
@@ -11,7 +11,7 @@
 using namespace std;
 
 
-// OPENGL³¡¾°µÄ¸÷ÖÖ²ÎÊýdeclaration
+// OPENGLï¿½ï¿½ï¿½ï¿½ï¿½Ä¸ï¿½ï¿½Ö²ï¿½ï¿½ï¿½declaration
 Scene* Scene::pscene = nullptr;
 int Scene::oldX = 0, Scene::oldY = 0;
 float Scene::rX = 15, Scene::rY = 0;
@@ -77,7 +77,7 @@ Scene::Scene(int argc, char** argv)
 		fprintf(stderr, "%s\n", glewGetErrorString(err));
 		return;
 	}
-	wglSwapIntervalEXT(0);  // disable Vertical synchronization
+	// wglSwapIntervalEXT(0);  // disable Vertical synchronization
 }
 
 Scene::~Scene()
@@ -177,7 +177,10 @@ void Scene::init_simulation()
 {
 	if (cloth && body)
 	{
-		simulation = new Simulator(*cloth, *body);
+		std::vector<Mesh> bodies;
+		for(int i = 0; i < 1; i++)
+			bodies.emplace_back(*body);
+		simulation = new Simulator(*cloth, bodies);
 	}
 	else
 	{
@@ -197,8 +200,8 @@ void Scene::loadShader()
 	GLfloat lightColor[3] = { 0.8,0.8,0.8 };
 	GLfloat objectColor[3] = { 0.8,0.8,0.8 };
 
-	renderShader.LoadFromFile(GL_VERTEX_SHADER, "../../../src/shaders/sh.vert");   
-	renderShader.LoadFromFile(GL_FRAGMENT_SHADER, "../../../src/shaders/sh.frag");
+	renderShader.LoadFromFile(GL_VERTEX_SHADER, "./src/shaders/sh.vert");   
+	renderShader.LoadFromFile(GL_FRAGMENT_SHADER, "./src/shaders/sh.frag");
 	renderShader.CreateAndLinkProgram();
 
 	renderShader.Use();
@@ -220,7 +223,7 @@ void Scene::save_obj(string file, vector<glm::vec3> vertices)
 	ofstream outfile(file);
 	for (auto ver : vertices)
 	{
-		outfile << "v " << ver.x << " " << ver.y << " " << ver.z << endl;   //Êý¾ÝÐ´ÈëÎÄ¼þ
+		outfile << "v " << ver.x << " " << ver.y << " " << ver.z << endl;   //ï¿½ï¿½ï¿½ï¿½Ð´ï¿½ï¿½ï¿½Ä¼ï¿½
 	}
 	outfile.close();
 }
@@ -246,7 +249,7 @@ void Scene::screenshot()
 	delete[] pixels;
 	cout << str << " saved successfully!" << endl;
 }
-// OPENGL³¡¾°µÄ¸÷ÖÖº¯Êý
+// OPENGLï¿½ï¿½ï¿½ï¿½ï¿½Ä¸ï¿½ï¿½Öºï¿½ï¿½ï¿½
 void Scene::DrawGrid()
 {
 	const int GRID_SIZE = 10;
