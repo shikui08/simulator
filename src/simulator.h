@@ -4,6 +4,13 @@
 #include "spring.h"
 #include "/usr/local/cuda-12.1/include/cuda_runtime_api.h"
 #include "/usr/local/cuda-12.1/include/cuda_gl_interop.h"
+#include <thrust/device_vector.h>
+#include <thrust/host_vector.h>
+#include "../build/_deps/cudatest-src/TriangleMeshDistance.h"
+
+typedef tmd::TriangleMeshDistance<std::vector, true> HostTBuild;
+typedef tmd::TriangleMeshDistance<std::vector, false> HostTQuery;
+typedef tmd::TriangleMeshDistance<thrust::device_vector, false> DeviTQuery;
 
 
 class Simulator
@@ -56,5 +63,9 @@ public:
 
 	//for bvh tree
 	std::vector<BVHAccel*> cuda_bvh;
+
+public:
+	std::vector<HostTBuild> distInstBuildArr;
+	std::vector<DeviTQuery> distInstQueryArr;
 };
 

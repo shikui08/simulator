@@ -2,16 +2,16 @@
 #include "./bvh/bvh.h"
 #include "spring.h"
 #include <cuda.h>
-#include <device_functions.h>
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
 #include <glm/glm.hpp>
+#include "../build/_deps/cudatest-src/TriangleMeshDistance.h"
 
 
 
 //physics parameter
 __constant__ double spring_structure = 100.0;
-__constant__ double spring_bend = 5.0;
+__constant__ double spring_bend = 2.0;
 __constant__ float damp = -0.02f; 
 __constant__ float mass = 0.3;
 __constant__ float dt = 1 / 100.0f;
@@ -21,10 +21,20 @@ __constant__ float gravit_y = -0.00981f;   // in y dir
 __constant__ float gravit_z = 0.0f;   // in y dir
 
 
-__device__ void collision_response_projection(D_BVH bvh,
+__device__ void collision_response_projection(
+	D_BVH bvh,
+	//
+	tmd::Vec3d*               	vertices,				
+	std::array<int, 3>*  	triangles,				
+	tmd::Node* 				 	nodes,					
+	tmd::Vec3d* 				 	pseudonormals_triangles,	
+	std::array<tmd::Vec3d, 3>*	pseudonormals_edges,		
+	tmd::Vec3d* 				 	pseudonormals_vertices, 
+	//
 	glm::vec3& force, glm::vec3& pos, glm::vec3& pos_old,
 	int idx, glm::vec3* collision_force)
 {
+#if 0
 	int idx_pri;
 	bool inter = bvh.intersect(pos, idx_pri);
 	if (inter)
@@ -33,7 +43,7 @@ __device__ void collision_response_projection(D_BVH bvh,
 		glm::vec3 normal;
 		if (bvh.primitive_intersect(idx_pri, pos, dist, normal))  // check the point inside the primitive or not
 		{
-			float k = 2.0;
+			float k = 1.0;
 			dist = k*glm::abs(dist);    // //collision response with penalty force
 			pos += dist*normal;
 			pos_old = pos;
@@ -46,7 +56,27 @@ __device__ void collision_response_projection(D_BVH bvh,
 	}
 	else
 		collision_force[idx] = glm::vec3(0.0);
-
+#else
+	auto result = tmd::signed_distance(
+		{pos.x, pos.y, pos.z},
+		vertices,
+		triangles,
+		nodes,
+		pseudonormals_triangles,
+		pseudonormals_edges,
+		pseudonormals_vertices
+	);
+	if (result.distance < 0)
+	{
+		glm::vec3 nearpoint = glm::vec3(result.nearest_point[0], result.nearest_point[1], result.nearest_point[2]);
+		glm::vec3 normal = glm::normalize(nearpoint - pos);
+		pos = nearpoint;
+		pos_old = pos;
+		collision_force[idx] = normal;
+	}
+	else
+		collision_force[idx] = glm::vec3(0.0);
+#endif
 }
 
 __device__ glm::vec3 compute_spring_force(int index, glm::vec3* g_pos_in, glm::vec3* g_pos_old_in,
@@ -128,7 +158,16 @@ __global__ void update_vbo_pos(glm::vec4* pos_vbo, glm::vec3* pos_cur, const uns
 
 __global__ void verlet(glm::vec3 * g_pos_in, glm::vec3 * g_pos_old_in, glm::vec3 * g_pos_out, glm::vec3 * g_pos_old_out,
 						unsigned int* CSR_R_STR, s_spring* CSR_C_STR, unsigned int* CSR_R_BD, s_spring* CSR_C_BD,
-					    D_BVH bvh, glm::vec3* collision_force,
+					    D_BVH bvh, 
+						//
+						tmd::Vec3d*               	vertices,				
+						std::array<int, 3>*  	triangles,				
+						tmd::Node* 				 	nodes,					
+						tmd::Vec3d* 				 	pseudonormals_triangles,	
+						std::array<tmd::Vec3d, 3>*	pseudonormals_edges,		
+						tmd::Vec3d* 				 	pseudonormals_vertices, 
+						//
+						glm::vec3* collision_force,
 						const unsigned int NUM_VERTICES)
 {
 	unsigned int index = blockIdx.x * blockDim.x + threadIdx.x;
@@ -154,7 +193,17 @@ __global__ void verlet(glm::vec3 * g_pos_in, glm::vec3 * g_pos_old_in, glm::vec3
 	glm::vec3 tmp = pos;          
 	pos = pos + pos - pos_old + acc * dt * dt;   
 	pos_old = tmp;
-	collision_response_projection(bvh, force, pos, pos_old, index, collision_force);
+	collision_response_projection(
+		bvh, 
+		//
+		vertices,				
+		triangles,				
+		nodes,					
+		pseudonormals_triangles,	
+		pseudonormals_edges,		
+		pseudonormals_vertices, 
+		//
+		force, pos, pos_old, index, collision_force);
 
 	g_pos_out[index] = pos;
 	g_pos_old_out[index] = pos_old;

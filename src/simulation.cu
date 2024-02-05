@@ -15,7 +15,16 @@ using namespace std;
 __global__ void compute_face_normal(glm::vec3* g_pos_in, unsigned int* cloth_index, const unsigned int cloth_index_size, glm::vec3* cloth_face);   //update cloth face normal
 __global__ void verlet(glm::vec3 * g_pos_in, glm::vec3 * g_pos_old_in, glm::vec3 * g_pos_out, glm::vec3 * g_pos_old_out,
 						unsigned int* CSR_R_STR, s_spring* CSR_C_STR, unsigned int* CSR_R_BD, s_spring* CSR_C_BD,
-						D_BVH bvh, glm::vec3* d_collision_force,
+						D_BVH bvh, 
+						//
+						tmd::Vec3d*               	vertices,				
+						std::array<int, 3>*  	triangles,				
+						tmd::Node* 				 	nodes,					
+						tmd::Vec3d* 				 	pseudonormals_triangles,	
+						std::array<tmd::Vec3d, 3>*	pseudonormals_edges,		
+						tmd::Vec3d* 				 	pseudonormals_vertices, 
+						//
+						glm::vec3* d_collision_force,
 						const unsigned int NUM_VERTICES);  //verlet intergration
 __global__ void update_vbo_pos(glm::vec4* pos_vbo, glm::vec3* pos_cur, const unsigned int NUM_VERTICES);
 __global__ void compute_vbo_normal(glm::vec3* normals, unsigned int* CSR_R, unsigned int* CSR_C_adjface_to_vertex, glm::vec3* face_normal, const unsigned int NUM_VERTICES);
@@ -124,6 +133,30 @@ void Simulator::init_spring(Mesh& sim_cloth)
 	cout << "springs build successfully!" << endl;
 }
 
+
+// __global__ void vvv(
+// 	tmd::Vec3d*               	vertices,				
+// 	std::array<int, 3>*  	triangles,				
+// 	tmd::Node* 				 	nodes,					
+// 	tmd::Vec3d* 				 	pseudonormals_triangles,	
+// 	std::array<tmd::Vec3d, 3>*	pseudonormals_edges,		
+// 	tmd::Vec3d* 				 	pseudonormals_vertices, 
+// 	float* fooArray) {
+//   int i = blockIdx.x * blockDim.x + threadIdx.x;
+  
+//   auto ret = tmd::signed_distance(
+// 	{i - 50,0,0},
+// 	vertices,
+// 	triangles,
+// 	nodes,
+// 	pseudonormals_triangles,
+// 	pseudonormals_edges,
+// 	pseudonormals_vertices
+//   );
+// 	fooArray[i] = ret.distance;
+// }
+
+
 void Simulator::build_bvh(std::vector<Mesh>& bodyvec)
 {
 	stop_watch watch;
@@ -134,6 +167,95 @@ void Simulator::build_bvh(std::vector<Mesh>& bodyvec)
 
 		watch.start();
 		cuda_bvh.emplace_back(new BVHAccel(bvh_body));
+
+		{
+			std::vector<tmd::Vec3d> vertices;
+			std::vector<std::array<int, 3>> connectivity;
+			for(auto& v : bvh_body.vertices)
+				vertices.emplace_back(tmd::Vec3d(v[0], v[1], v[2]));
+			for(auto& f : bvh_body.faces)
+				connectivity.emplace_back(std::array<int, 3>({f.vertex_index[0], f.vertex_index[1], f.vertex_index[2]}));
+			// std::vector<tmd::Vec3d> vertices = { { 1, -1, -1 }, { 1, 0, -1 }, { 1, 1, -1 }, { 1, -1, 0 }, { 1, 0, 0 }, { 1, 1, 0 }, { 1, -1, 1 }, { 1, 0, 1 }, { 1, 1, 1 }, { -1, -1, -1 }, { -1, 0, -1 }, { -1, 1, -1 }, { -1, -1, 0 }, { -1, 0, 0 }, { -1, 1, 0 }, { -1, -1, 1 }, { -1, 0, 1 }, { -1, 1, 1 }, { 0, 1, -1 }, { 0, 1, 0 }, { 0, 1, 1 }, { 0, -1, -1 }, { 0, -1, 0 }, { 0, -1, 1 }, { 0, 0, 1 }, { 0, 0, -1 } };
+			// std::vector<std::array<int, 3>> connectivity = { { 0, 1, 3 }, { 1, 4, 3 }, { 1, 2, 4 }, { 2, 5, 4 }, { 3, 4, 6 }, { 4, 7, 6 }, { 4, 5, 7 }, { 5, 8, 7 }, { 12, 10, 9 }, { 12, 13, 10 }, { 13, 11, 10 }, { 13, 14, 11 }, { 15, 13, 12 }, { 15, 16, 13 }, { 16, 14, 13 }, { 16, 17, 14 }, { 14, 18, 11 }, { 14, 19, 18 }, { 19, 2, 18 }, { 19, 5, 2 }, { 17, 19, 14 }, { 17, 20, 19 }, { 20, 5, 19 }, { 20, 8, 5 }, { 9, 21, 12 }, { 21, 22, 12 }, { 21, 0, 22 }, { 0, 3, 22 }, { 12, 22, 15 }, { 22, 23, 15 }, { 22, 3, 23 }, { 3, 6, 23 }, { 15, 23, 16 }, { 23, 24, 16 }, { 23, 6, 24 }, { 6, 7, 24 }, { 16, 24, 17 }, { 24, 20, 17 }, { 24, 7, 20 }, { 7, 8, 20 }, { 10, 21, 9 }, { 10, 25, 21 }, { 25, 0, 21 }, { 25, 1, 0 }, { 11, 25, 10 }, { 11, 18, 25 }, { 18, 1, 25 }, { 18, 2, 1 } };
+			// bvh_body.save("/tmp/1.obj");
+			// HostTBuild bui;
+			distInstBuildArr.emplace_back();
+			distInstQueryArr.emplace_back();
+			distInstBuildArr.back().construct(vertices, connectivity);
+			distInstQueryArr.back().vertices                = distInstBuildArr.back().vertices; 
+			distInstQueryArr.back().triangles               = distInstBuildArr.back().triangles; 
+			distInstQueryArr.back().nodes                   = distInstBuildArr.back().nodes; 
+			distInstQueryArr.back().pseudonormals_triangles = distInstBuildArr.back().pseudonormals_triangles; 
+			distInstQueryArr.back().pseudonormals_edges     = distInstBuildArr.back().pseudonormals_edges; 
+			distInstQueryArr.back().pseudonormals_vertices  = distInstBuildArr.back().pseudonormals_vertices; 
+			distInstQueryArr.back().is_constructed          = true; 
+
+			// std::cout << "BUILD\n";
+			// HostTQuery mesh_distance_;
+
+			// mesh_distance_.vertices                = bui.vertices; 
+			// mesh_distance_.triangles               = bui.triangles; 
+			// mesh_distance_.nodes                   = bui.nodes; 
+			// mesh_distance_.pseudonormals_triangles = bui.pseudonormals_triangles; 
+			// mesh_distance_.pseudonormals_edges     = bui.pseudonormals_edges; 
+			// mesh_distance_.pseudonormals_vertices  = bui.pseudonormals_vertices; 
+			// mesh_distance_.is_constructed          = true; 
+
+			// for (int x = 0; x < 100; x += 1) {
+			// 	const auto result = mesh_distance_.signed_distance({ x - 50, 0, 0 });
+			// 	// const float exact = point_AABB_signed({ x - 50, 0, 0 }, { -1, -1, -1 }, { 1, 1, 1 });
+			// 	std::cout << result.distance <<  std::endl;
+			// }
+			
+			// for(int x = 0; x < 100; x += 1) {
+			// 	auto ret = tmd::signed_distance(
+			// 		{x - 50,0,0},
+			// 		bui.vertices.data(),
+			// 		bui.triangles.data(),
+			// 		bui.nodes.data(),
+			// 		bui.pseudonormals_triangles.data(),
+			// 		bui.pseudonormals_edges.data(),
+			// 		bui.pseudonormals_vertices.data()
+			// 	);
+			// 	std::cout << "? " << ret.distance << std::endl;
+			// }
+			// {
+			// 	thrust::device_vector<tmd::Vec3d> vertices 								= bui.vertices; 
+			// 	thrust::device_vector<std::array<int, 3>> triangles 					= bui.triangles; 
+			// 	thrust::device_vector<tmd::Node> nodes 									= bui.nodes; 
+			// 	thrust::device_vector<tmd::Vec3d> pseudonormals_triangles 				= bui.pseudonormals_triangles; 
+			// 	thrust::device_vector<std::array<tmd::Vec3d, 3>> pseudonormals_edges 	= bui.pseudonormals_edges; 
+			// 	thrust::device_vector<tmd::Vec3d> pseudonormals_vertices 				= bui.pseudonormals_vertices; 
+			// 	thrust::device_vector<float> outdist;
+			// 	outdist.resize(100);
+			// 	printf(" %d %d  %d %d  %d %d; %lld %lld %lld %lld %lld %lld \n", 
+			// 		vertices.size(),
+			// 		triangles.size(),
+			// 		nodes.size(),
+			// 		pseudonormals_triangles.size(),
+			// 		pseudonormals_edges.size(),
+			// 		pseudonormals_vertices.size(),
+			// 		thrust::raw_pointer_cast(vertices.data()),				
+			// 		thrust::raw_pointer_cast(triangles.data()),				
+			// 		thrust::raw_pointer_cast(nodes.data()),					
+			// 		thrust::raw_pointer_cast(pseudonormals_triangles.data()),	
+			// 		thrust::raw_pointer_cast(pseudonormals_edges.data()),		
+			// 		thrust::raw_pointer_cast(pseudonormals_vertices.data())
+			// 	);
+			// 	auto error = cudaDeviceSetLimit(cudaLimitStackSize, 40 * 1024 * 1024);
+			// 	vvv<<<dim3(10, 1, 1), dim3(10, 1, 1)>>>(
+			// 		thrust::raw_pointer_cast(vertices.data()),				
+			// 		thrust::raw_pointer_cast(triangles.data()),				
+			// 		thrust::raw_pointer_cast(nodes.data()),					
+			// 		thrust::raw_pointer_cast(pseudonormals_triangles.data()),	
+			// 		thrust::raw_pointer_cast(pseudonormals_edges.data()),		
+			// 		thrust::raw_pointer_cast(pseudonormals_vertices.data()), 
+			// 		thrust::raw_pointer_cast(outdist.data()));
+			// 	safe_cuda(cudaDeviceSynchronize());
+			// 	thrust::copy_n(outdist.begin(), outdist.size(), std::ostream_iterator<float>(std::cout, ","));
+			// }
+		}
+
 		watch.stop();
 		cout << "bvh build done free time elapsed: " << watch.elapsed() << "us" << endl;
 	}
@@ -189,7 +311,16 @@ void Simulator::cuda_verlet(int frameidx, const unsigned int numParticles)
 	computeGridSize(numParticles, 512, numBlocks, numThreads);
 	verlet <<< numBlocks, numThreads >>>(x_cur_in,x_last_in, x_cur_out, x_last_out,
 										CSR_R_structure, CSR_C_structure, CSR_R_bend, CSR_C_bend,
-										*(cuda_bvh[frameidx]->d_bvh), d_collision_force,
+										*(cuda_bvh[frameidx]->d_bvh), 
+										//
+										thrust::raw_pointer_cast(distInstQueryArr[frameidx].vertices.data()),				
+										thrust::raw_pointer_cast(distInstQueryArr[frameidx].triangles.data()),				
+										thrust::raw_pointer_cast(distInstQueryArr[frameidx].nodes.data()),					
+										thrust::raw_pointer_cast(distInstQueryArr[frameidx].pseudonormals_triangles.data()),	
+										thrust::raw_pointer_cast(distInstQueryArr[frameidx].pseudonormals_edges.data()),		
+										thrust::raw_pointer_cast(distInstQueryArr[frameidx].pseudonormals_vertices.data()), 
+										//
+										d_collision_force,
 										numParticles);
 
 	// stop the CPU until the kernel has been executed
